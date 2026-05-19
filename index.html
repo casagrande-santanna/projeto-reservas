@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Casa Grande de Sant'Anna - Reservas</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #1e40af;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --border-radius: 0.5rem;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    header {
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 1rem 0;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    header h1 {
+      font-size: 1.875rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--gray-600);
+      font-size: 0.875rem;
+    }
+
+    .status-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--gray-200);
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      color: var(--gray-700);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .card-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+    }
+
+    button:disabled {
+      background: var(--gray-400);
+      cursor: not-allowed;
+    }
+
+    button.secondary {
+      background: var(--gray-200);
+      color: var(--gray-900);
+    }
+
+    button.secondary:hover {
+      background: var(--gray-300);
+    }
+
+    button.danger {
+      background: var(--danger);
+    }
+
+    button.danger:hover {
+      background: #dc2626;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    .input-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--gray-700);
+      font-size: 0.875rem;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-family: inherit;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+      border-left: 4px solid;
+    }
+
+    .alert.success {
+      background: #d1fae5;
+      border-color: var(--success);
+      color: #065f46;
+    }
+
+    .alert.error {
+      background: #fee2e2;
+      border-color: var(--danger);
+      color: #7f1d1d;
+    }
+
+    .alert.warning {
+      background: #fef3c7;
+      border-color: var(--warning);
+      color: #78350f;
+    }
+
+    .alert.info {
+      background: #dbeafe;
+      border-color: var(--primary);
+      color: #1e3a8a;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid var(--gray-300);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: var(--gray-600);
+      font-size: 0.875rem;
+      border-top: 1px solid var(--gray-200);
+      margin-top: 3rem;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      header h1 {
+        font-size: 1.5rem;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>🏐 Casa Grande de Sant'Anna</h1>
+      <p>Sistema de Reservas de Quadra</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Status Cards -->
+    <div class="status-container" id="status">
+      <div class="card">
+        <h2>📊 Status do Sistema</h2>
+        <div class="card-value" id="status-value">Carregando...</div>
+        <div class="card-subtitle" id="status-subtitle"></div>
+      </div>
+
+      <div class="card">
+        <h2>🔧 Configuração</h2>
+        <div class="card-value" id="config-version">--</div>
+        <div class="card-subtitle" id="config-subtitle"></div>
+      </div>
+
+      <div class="card">
+        <h2>🗄️ Banco de Dados</h2>
+        <div class="card-value" id="db-status">Conectando...</div>
+        <div class="card-subtitle" id="db-subtitle"></div>
+      </div>
+    </div>
+
+    <!-- Main Section -->
+    <div class="card" id="main-section">
+      <h2>Bem-vindo!</h2>
+      <p>
+        Este é o novo sistema de reservas modularizado e seguro. 
+        Todos os dados estão protegidos pelo RLS do Supabase.
+      </p>
+
+      <div class="button-group">
+        <button id="btn-test-connection">Testar Conexão com Banco</button>
+        <button id="btn-load-config" class="secondary">Carregar Configurações</button>
+        <button id="btn-validate-input" class="secondary">Testar Validadores</button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div id="messages" style="margin-top: 2rem;"></div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© 2026 Procuradoria Municipal de Paulista. Todos os direitos reservados.</p>
+      <p>Sistema Modularizado | Supabase | Vite</p>
+    </div>
+  </footer>
+
+  <!-- Script Principal -->
+  <script type="module">
+    // Importar módulos
+    import { supabase, config } from './src/config/supabase.js';
+    import { apiClient } from './src/modules/api-client.js';
+    import { validators, validateFields } from './src/utils/validators.js';
+    import { formatters } from './src/utils/formatters.js';
+
+    // Variáveis globais
+    const app = {
+      supabase,
+      apiClient,
+      validators,
+      formatters,
+      config,
+    };
+
+    // Expor globalmente para debug
+    window.__app = app;
+
+    // ========== UI Helpers ==========
+    function showMessage(message, type = 'info') {
+      const messagesContainer = document.getElementById('messages');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert ${type}`;
+      alertDiv.textContent = message;
+      messagesContainer.appendChild(alertDiv);
+
+      setTimeout(() => alertDiv.remove(), 5000);
+    }
+
+    function updateStatus(id, value, subtitle) {
+      const element = document.getElementById(id);
+      if (element) {
+        element.textContent = value;
+      }
+      const subtitleElement = document.getElementById(id.replace('-value', '-subtitle'));
+      if (subtitleElement) {
+        subtitleElement.textContent = subtitle;
+      }
+    }
+
+    // ========== Event Listeners ==========
+    document.getElementById('btn-test-connection').addEventListener('click', testConnection);
+    document.getElementById('btn-load-config').addEventListener('click', loadConfig);
+    document.getElementById('btn-validate-input').addEventListener('click', testValidators);
+
+    // ========== Functions ==========
+    async function testConnection() {
+      try {
+        showMessage('🔄 Testando conexão com Supabase...', 'info');
+        
+        const { data, error } = await supabase
+          .from('configuracoes')
+          .select('count')
+          .limit(1);
+
+        if (error) throw error;
+
+        updateStatus('db-status', '✅ Conectado', 'Conexão com Supabase OK');
+        showMessage('✅ Conexão com banco de dados estabelecida com sucesso!', 'success');
+      } catch (error) {
+        updateStatus('db-status', '❌ Erro', 'Falha na conexão');
+        showMessage(`❌ Erro: ${error.message}`, 'error');
+      }
+    }
+
+    function loadConfig() {
+      try {
+        showMessage('⚙️ Carregando configurações...', 'info');
+        
+        updateStatus('config-version', config.app.version, `App: ${config.app.name}`);
+        updateStatus('status-value', '✅ Pronto', 'Sistema operacional');
+
+        const configText = JSON.stringify(config, null, 2);
+        showMessage(`✅ Configurações carregadas: ${JSON.stringify(config.app)}`, 'success');
+      } catch (error) {
+        showMessage(`❌ Erro: ${error.message}`, 'error');
+      }
+    }
+
+    function testValidators() {
+      try {
+        showMessage('🧪 Testando validadores...', 'info');
+
+        // Testes
+        const tests = [
+          { name: 'Email válido', result: validators.isValidEmail('test@example.com') },
+          { name: 'Email inválido', result: !validators.isValidEmail('invalid') },
+          { name: 'Horário válido', result: validators.isValidTime('14:30') },
+          { name: 'Data válida', result: validators.isValidDate('2026-05-19') },
+          { name: 'UUID válido', result: validators.isValidUUID('550e8400-e29b-41d4-a716-446655440000') },
+          { name: 'Duração válida', result: validators.isValidDuration(90) },
+        ];
+
+        const allPassed = tests.every(t => t.result);
+        const results = tests.map(t => `${t.result ? '✅' : '❌'} ${t.name}`).join('\n');
+
+        showMessage(`✅ Testes de validação: ${allPassed ? 'TODOS PASSARAM' : 'ALGUNS FALHARAM'}\n${results}`, allPassed ? 'success' : 'warning');
+      } catch (error) {
+        showMessage(`❌ Erro: ${error.message}`, 'error');
+      }
+    }
+
+    // ========== Inicialização ==========
+    function initialize() {
+      console.log('✅ Sistema inicializado');
+      console.log('📱 Aplicação:', config.app.name, `v${config.app.version}`);
+      console.log('🔧 Debug mode:', config.features.debugMode);
+      console.log('⚡ Fair Play:', config.features.fairPlayEnabled);
+      
+      updateStatus('status-value', '✅ Pronto', 'Sistema operacional');
+      updateStatus('config-version', config.app.version, `App: ${config.app.name}`);
+      
+      showMessage('✅ Sistema carregado com sucesso! Use os botões para testar funcionalidades.', 'success');
+    }
+
+    // Chamar inicialização
+    initialize();
+  </script>
+</body>
+</html>
