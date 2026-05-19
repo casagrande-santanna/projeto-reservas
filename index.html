@@ -300,7 +300,69 @@
   <button id="btn-validate-input" class="secondary">Testar Validadores</button>
   <button id="btn-test-reservas" class="secondary">Testar Módulo Reservas</button>
 </div>
+<!-- Seção de Autenticação -->
+<div class="card" id="auth-section" style="margin-bottom: 2rem;">
+  <h2>🔐 Autenticação</h2>
+  
+  <!-- Formulário de Login (Oculto inicialmente) -->
+  <div id="login-form" class="hidden">
+    <div class="input-group">
+      <label>Email</label>
+      <input type="email" id="email-login" placeholder="seu@email.com">
+    </div>
+    <div class="input-group">
+      <label>Senha</label>
+      <input type="password" id="senha-login" placeholder="••••••••">
+    </div>
+    <div class="button-group">
+      <button id="btn-login">Entrar</button>
+      <button id="btn-mostrar-registro" class="secondary">Criar Conta</button>
+      <button id="btn-mostrar-recuperar" class="secondary">Recuperar Senha</button>
+    </div>
+  </div>
 
+  <!-- Formulário de Registro (Oculto inicialmente) -->
+  <div id="registro-form" class="hidden">
+    <div class="input-group">
+      <label>Nome Completo</label>
+      <input type="text" id="nome-registro" placeholder="João Silva">
+    </div>
+    <div class="input-group">
+      <label>Email</label>
+      <input type="email" id="email-registro" placeholder="seu@email.com">
+    </div>
+    <div class="input-group">
+      <label>Senha (mínimo 8 caracteres)</label>
+      <input type="password" id="senha-registro" placeholder="••••••••">
+    </div>
+    <div class="button-group">
+      <button id="btn-registrar">Criar Conta</button>
+      <button id="btn-voltar-login" class="secondary">Voltar</button>
+    </div>
+  </div>
+
+  <!-- Formulário de Recuperação (Oculto inicialmente) -->
+  <div id="recuperar-form" class="hidden">
+    <div class="input-group">
+      <label>Email para Recuperação</label>
+      <input type="email" id="email-recuperar" placeholder="seu@email.com">
+    </div>
+    <div class="button-group">
+      <button id="btn-recuperar">Enviar Link</button>
+      <button id="btn-voltar-login-recuperar" class="secondary">Voltar</button>
+    </div>
+  </div>
+
+  <!-- Status Logado (Oculto inicialmente) -->
+  <div id="usuario-logado" class="hidden">
+    <p style="font-size: 1.1rem; margin-bottom: 1rem;">
+      ✅ Logado como: <strong id="nome-usuario">--</strong>
+    </p>
+    <div class="button-group">
+      <button id="btn-logout" class="danger">Sair</button>
+    </div>
+  </div>
+</div>
     <!-- Messages -->
     <div id="messages" style="margin-top: 2rem;"></div>
   </main>
@@ -359,6 +421,17 @@
     document.getElementById('btn-load-config').addEventListener('click', loadConfig);
     document.getElementById('btn-validate-input').addEventListener('click', testValidators);
     document.getElementById('btn-test-reservas').addEventListener('click', testReservas);
+    // Eventos de Autenticação
+document.getElementById('btn-login').addEventListener('click', fazerLogin);
+document.getElementById('btn-registrar').addEventListener('click', fazerRegistro);
+document.getElementById('btn-logout').addEventListener('click', fazerLogout);
+document.getElementById('btn-recuperar').addEventListener('click', fazerRecuperacao);
+
+// Trocar entre formulários
+document.getElementById('btn-mostrar-registro').addEventListener('click', () => mostrarFormulario('registro'));
+document.getElementById('btn-mostrar-recuperar').addEventListener('click', () => mostrarFormulario('recuperar'));
+document.getElementById('btn-voltar-login').addEventListener('click', () => mostrarFormulario('login'));
+document.getElementById('btn-voltar-login-recuperar').addEventListener('click', () => mostrarFormulario('login'));
 
     // ========== Functions ==========
     async function testConnection() {
@@ -424,6 +497,144 @@
     showMessage(`❌ Erro: ${error.message}`, 'error');
   }
 }
+async function fazerLogin() {
+  try {
+    const email = document.getElementById('email-login').value;
+    const senha = document.getElementById('senha-login').value;
+
+    if (!email || !senha) {
+      showMessage('❌ Preencha email e senha', 'error');
+      return;
+    }
+
+    showMessage('⏳ Fazendo login...', 'info');
+
+    const { autenticacaoModule } = await import('./src/modules/autenticacao.js');
+    const resultado = await autenticacaoModule.login(email, senha);
+
+    if (resultado.sucesso) {
+      showMessage(resultado.mensagem, 'success');
+      document.getElementById('email-login').value = '';
+      document.getElementById('senha-login').value = '';
+      atualizarStatusAuth();
+    } else {
+      showMessage(resultado.mensagem, 'error');
+    }
+  } catch (error) {
+    showMessage(`❌ Erro: ${error.message}`, 'error');
+  }
+}
+
+async function fazerRegistro() {
+  try {
+    const nome = document.getElementById('nome-registro').value;
+    const email = document.getElementById('email-registro').value;
+    const senha = document.getElementById('senha-registro').value;
+
+    if (!nome || !email || !senha) {
+      showMessage('❌ Preencha todos os campos', 'error');
+      return;
+    }
+
+    showMessage('⏳ Criando conta...', 'info');
+
+    const { autenticacaoModule } = await import('./src/modules/autenticacao.js');
+    const resultado = await autenticacaoModule.registrar(email, senha, nome);
+
+    if (resultado.sucesso) {
+      showMessage(resultado.mensagem, 'success');
+      document.getElementById('nome-registro').value = '';
+      document.getElementById('email-registro').value = '';
+      document.getElementById('senha-registro').value = '';
+      mostrarFormulario('login');
+    } else {
+      showMessage(resultado.mensagem, 'error');
+    }
+  } catch (error) {
+    showMessage(`❌ Erro: ${error.message}`, 'error');
+  }
+}
+
+async function fazerLogout() {
+  try {
+    showMessage('⏳ Fazendo logout...', 'info');
+
+    const { autenticacaoModule } = await import('./src/modules/autenticacao.js');
+    const resultado = await autenticacaoModule.logout();
+
+    if (resultado.sucesso) {
+      showMessage(resultado.mensagem, 'success');
+      atualizarStatusAuth();
+    } else {
+      showMessage(resultado.mensagem, 'error');
+    }
+  } catch (error) {
+    showMessage(`❌ Erro: ${error.message}`, 'error');
+  }
+}
+
+async function fazerRecuperacao() {
+  try {
+    const email = document.getElementById('email-recuperar').value;
+
+    if (!email) {
+      showMessage('❌ Digite seu email', 'error');
+      return;
+    }
+
+    showMessage('⏳ Enviando email de recuperação...', 'info');
+
+    const { autenticacaoModule } = await import('./src/modules/autenticacao.js');
+    const resultado = await autenticacaoModule.recuperarSenha(email);
+
+    if (resultado.sucesso) {
+      showMessage(resultado.mensagem, 'success');
+      document.getElementById('email-recuperar').value = '';
+      mostrarFormulario('login');
+    } else {
+      showMessage(resultado.mensagem, 'error');
+    }
+  } catch (error) {
+    showMessage(`❌ Erro: ${error.message}`, 'error');
+  }
+}
+
+function mostrarFormulario(tipo) {
+  // Ocultar todos
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('registro-form').classList.add('hidden');
+  document.getElementById('recuperar-form').classList.add('hidden');
+  document.getElementById('usuario-logado').classList.add('hidden');
+
+  // Mostrar selecionado
+  if (tipo === 'login') {
+    document.getElementById('login-form').classList.remove('hidden');
+  } else if (tipo === 'registro') {
+    document.getElementById('registro-form').classList.remove('hidden');
+  } else if (tipo === 'recuperar') {
+    document.getElementById('recuperar-form').classList.remove('hidden');
+  }
+}
+
+async function atualizarStatusAuth() {
+  try {
+    const { autenticacaoModule } = await import('./src/modules/autenticacao.js');
+    const usuario = await autenticacaoModule.obterUsuarioLogado();
+
+    if (usuario.logado) {
+      // Mostrar status logado
+      mostrarFormulario('');
+      document.getElementById('usuario-logado').classList.remove('hidden');
+      document.getElementById('nome-usuario').textContent = usuario.usuario.nome;
+    } else {
+      // Mostrar formulário de login
+      document.getElementById('usuario-logado').classList.add('hidden');
+      mostrarFormulario('login');
+    }
+  } catch (error) {
+    console.error('Erro ao atualizar status:', error);
+  }
+}
     function testValidators() {
       try {
         showMessage('🧪 Testando validadores...', 'info');
@@ -456,7 +667,8 @@
       
       updateStatus('status-value', '✅ Pronto', 'Sistema operacional');
       updateStatus('config-version', config.app.version, `App: ${config.app.name}`);
-      
+      // Verificar status de autenticação
+  atualizarStatusAuth();
       showMessage('✅ Sistema carregado com sucesso! Use os botões para testar funcionalidades.', 'success');
     }
 
