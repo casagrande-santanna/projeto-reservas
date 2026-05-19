@@ -1,0 +1,1 @@
+const i={async obterDisponibilidade(s,o){try{const e=[];for(let r=6;r<22;r++)e.push(`${String(r).padStart(2,"0")}:00`);return{sucesso:!0,data:o,espaco_id:s,totalDisponivel:e.length,disponibilidade:e.map(r=>({horario:r,disponivel:!0}))}}catch(e){return{sucesso:!1,mensagem:`Erro: ${e.message}`,disponibilidade:[]}}}};export{i as reservasModule};
