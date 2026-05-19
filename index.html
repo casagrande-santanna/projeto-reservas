@@ -300,6 +300,62 @@
   <button id="btn-validate-input" class="secondary">Testar Validadores</button>
   <button id="btn-test-reservas" class="secondary">Testar Módulo Reservas</button>
 </div>
+<!-- Seção de Dashboard -->
+<div id="dashboard-section" class="hidden">
+  <h2 style="margin-bottom: 1.5rem;">📊 Dashboard</h2>
+  
+  <!-- Cards de Estatísticas -->
+  <div class="status-container">
+    <div class="card">
+      <h2>📋 Reservas Abertas</h2>
+      <div class="card-value" id="dashboard-reservas">--</div>
+      <div class="card-subtitle">no mês</div>
+    </div>
+    
+    <div class="card">
+      <h2>❌ Faltas</h2>
+      <div class="card-value" id="dashboard-faltas">--</div>
+      <div class="card-subtitle">este mês</div>
+    </div>
+    
+    <div class="card">
+      <h2>📈 Taxa de Ocupação</h2>
+      <div class="card-value" id="dashboard-ocupacao">--</div>
+      <div class="card-subtitle">da sua unidade</div>
+    </div>
+  </div>
+
+  <!-- Gráficos -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <h2>📊 Ocupação por Hora</h2>
+    <canvas id="chart-ocupacao" style="max-height: 250px;"></canvas>
+  </div>
+
+  <div class="card" style="margin-bottom: 2rem;">
+    <h2>📅 Reservas por Dia da Semana</h2>
+    <canvas id="chart-diaria" style="max-height: 250px;"></canvas>
+  </div>
+
+  <!-- Próximas Reservas -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <h2>🗓️ Próximas Reservas</h2>
+    <div id="proximas-reservas-list" style="max-height: 300px; overflow-y: auto;">
+      <p style="color: var(--gray-600);">Carregando...</p>
+    </div>
+  </div>
+
+  <!-- Ranking -->
+  <div class="card">
+    <h2>🏆 Ranking de Usuários</h2>
+    <div id="ranking-list" style="max-height: 300px; overflow-y: auto;">
+      <p style="color: var(--gray-600);">Carregando...</p>
+    </div>
+  </div>
+
+  <div class="button-group" style="margin-top: 2rem;">
+    <button id="btn-voltar-auth" class="secondary">Voltar</button>
+  </div>
+</div>
 <!-- Seção de Autenticação -->
 <div class="card" id="auth-section" style="margin-bottom: 2rem;">
   <h2>🔐 Autenticação</h2>
@@ -425,6 +481,11 @@
 document.getElementById('btn-login').addEventListener('click', fazerLogin);
 document.getElementById('btn-registrar').addEventListener('click', fazerRegistro);
 document.getElementById('btn-logout').addEventListener('click', fazerLogout);
+// Dashboard
+document.getElementById('btn-voltar-auth').addEventListener('click', () => {
+  mostrarFormulario('login');
+  document.getElementById('dashboard-section').classList.add('hidden');
+});
 document.getElementById('btn-recuperar').addEventListener('click', fazerRecuperacao);
 
 // Trocar entre formulários
@@ -615,7 +676,54 @@ function mostrarFormulario(tipo) {
     document.getElementById('recuperar-form').classList.remove('hidden');
   }
 }
-
+async function carregarDashboard(usuario_id) {
+  try {
+    document.getElementById('dashboard-section').classList.remove('hidden');
+    
+    const { dashboardModule } = await import('./src/modules/dashboard.js');
+    
+    // Obter estatísticas
+    const stats = await dashboardModule.obterEstatisticas(usuario_id);
+    if (stats.sucesso) {
+      document.getElementById('dashboard-reservas').textContent = stats.reservasAbertas;
+      document.getElementById('dashboard-faltas').textContent = stats.faltasMes;
+      document.getElementById('dashboard-ocupacao').textContent = `${stats.taxaOcupacao}%`;
+    }
+    
+    // Obter próximas reservas
+    const proximas = await dashboardModule.obterProximasReservas(usuario_id);
+    if (proximas.sucesso && proximas.reservas.length > 0) {
+      const html = proximas.reservas.map(r => `
+        <div style="padding: 1rem; border-bottom: 1px solid var(--gray-200);">
+          <p style="font-weight: 600;">${r.espaco_nome}</p>
+          <p style="color: var(--gray-600); font-size: 0.9rem;">
+            📅 ${r.data_formatada} às ${r.horario}
+          </p>
+        </div>
+      `).join('');
+      document.getElementById('proximas-reservas-list').innerHTML = html;
+    }
+    
+    // Obter ranking
+    const ranking = await dashboardModule.obterRanking();
+    if (ranking.sucesso && ranking.ranking.length > 0) {
+      const html = ranking.ranking.slice(0, 5).map(r => `
+        <div style="padding: 0.8rem; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between;">
+          <span>${r.medal} ${r.nome}</span>
+          <span style="font-weight: 600;">${r.reservas} reservas</span>
+        </div>
+      `).join('');
+      document.getElementById('ranking-list').innerHTML = html;
+    }
+    
+    // Gráficos (serão adicionados em breve)
+    console.log('Dashboard carregado com sucesso!');
+    
+  } catch (error) {
+    console.error('Erro ao carregar dashboard:', error);
+    showMessage(`❌ Erro: ${error.message}`, 'error');
+  }
+}
 async function atualizarStatusAuth() {
   try {
     const { autenticacaoModule } = await import('./src/modules/autenticacao.js');
@@ -626,6 +734,9 @@ async function atualizarStatusAuth() {
       mostrarFormulario('');
       document.getElementById('usuario-logado').classList.remove('hidden');
       document.getElementById('nome-usuario').textContent = usuario.usuario.nome;
+      
+      // Carregar dashboard
+      setTimeout(() => carregarDashboard(usuario.usuario.id), 500);
     } else {
       // Mostrar formulário de login
       document.getElementById('usuario-logado').classList.add('hidden');
