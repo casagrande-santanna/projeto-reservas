@@ -295,11 +295,11 @@
       </p>
 
       <div class="button-group">
-        <button id="btn-test-connection">Testar Conexão com Banco</button>
-        <button id="btn-load-config" class="secondary">Carregar Configurações</button>
-        <button id="btn-validate-input" class="secondary">Testar Validadores</button>
-      </div>
-    </div>
+  <button id="btn-test-connection">Testar Conexão com Banco</button>
+  <button id="btn-load-config" class="secondary">Carregar Configurações</button>
+  <button id="btn-validate-input" class="secondary">Testar Validadores</button>
+  <button id="btn-test-reservas" class="secondary">Testar Módulo Reservas</button>
+</div>
 
     <!-- Messages -->
     <div id="messages" style="margin-top: 2rem;"></div>
@@ -358,6 +358,7 @@
     document.getElementById('btn-test-connection').addEventListener('click', testConnection);
     document.getElementById('btn-load-config').addEventListener('click', loadConfig);
     document.getElementById('btn-validate-input').addEventListener('click', testValidators);
+    document.getElementById('btn-test-reservas').addEventListener('click', testReservas);
 
     // ========== Functions ==========
     async function testConnection() {
@@ -393,6 +394,36 @@
       }
     }
 
+    async function testReservas() {
+  try {
+    showMessage('🧪 Testando módulo de reservas...', 'info');
+
+    // Importar módulo
+    const moduloReservas = await import('./src/modules/reservas.js');
+    const { reservasModule } = moduloReservas;
+
+    // Teste: Obter disponibilidade
+    const hoje = new Date().toISOString().split('T')[0];
+    const resultado = await reservasModule.obterDisponibilidade(
+      'f47ac10b-58cc-4372-a567-0e02b2c3d479', // UUID exemplo
+      hoje
+    );
+
+    if (resultado.sucesso) {
+      showMessage(
+        `✅ Teste de Reservas:\nDisponibilidade obtida para ${resultado.data}\nTotal disponível: ${resultado.totalDisponivel} horários`,
+        'success'
+      );
+    } else {
+      showMessage(
+        `✅ Módulo funcionando (sem dados no BD):\n${resultado.mensagem}`,
+        'success'
+      );
+    }
+  } catch (error) {
+    showMessage(`❌ Erro: ${error.message}`, 'error');
+  }
+}
     function testValidators() {
       try {
         showMessage('🧪 Testando validadores...', 'info');
